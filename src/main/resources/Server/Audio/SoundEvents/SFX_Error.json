@@ -1,0 +1,11 @@
+{
+  "Parent": "SFX_Attn_Moderate",
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Effects/error_sound.ogg"
+      ],
+      "Volume": -6
+    }
+  ]
+}

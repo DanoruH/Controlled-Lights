@@ -1,0 +1,29 @@
+{
+  "HitBox": {
+    "Min": {
+      "X": -500,
+      "Y": -500,
+      "Z": -500
+    },
+    "Max": {
+      "X": -499,
+      "Y": -499,
+      "Z": -499
+    }
+  },
+  "Model": "Items/Guide/Selected1.blockymodel",
+  "Texture": "Items/Guide/Selected1_Texture.png",
+  "Icon": "Icons/ModelsGenerated/BlockSelected.png",
+  "IconProperties": {
+    "Scale": 0.2,
+    "Rotation": [
+      0,
+      -45,
+      0
+    ],
+    "Translation": [
+      0,
+      -75
+    ]
+  }
+}

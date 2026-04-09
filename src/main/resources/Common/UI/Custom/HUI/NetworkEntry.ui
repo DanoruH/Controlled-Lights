@@ -1,0 +1,43 @@
+$C = "../Common.ui";
+
+Group {
+  Anchor: (Height: 80);
+  Background: $C.@InputBoxBackground;
+  Padding: (Top: 6, Bottom: 6, Left: 15, Right: 10);
+
+  Group {
+    LayoutMode: Top;
+    Anchor: (Height: 50);
+    Label #NetworkLabel{
+      Text: "Network: UNKNOWN";
+
+      Style: (
+        FontSize: 18,
+        RenderBold: true,
+        TextColor: #ffffff,
+        VerticalAlignment: Center
+      );
+    }
+    Label #NetworkIndex{
+      Text: "Index: X";
+
+      Style: (
+        FontSize: 14,
+        RenderBold: true,
+        TextColor: #898989,
+        VerticalAlignment: Center
+      );
+    }
+  }
+
+  Group {
+    LayoutMode: Right;
+    Anchor: (Height: 30);
+    Padding: (Right: 10);
+
+    $C.@SecondaryTextButton #SelectedButton{
+      Anchor: (Width: 120, Height: 45);
+      Text: "SELECT";
+    }
+  }
+}

@@ -1,0 +1,64 @@
+
+$C = "../Common.ui";
+
+$C.@Container #Main {
+  Anchor: (Width: 560, Height: 420);
+  #Title {
+    $C.@Title {
+      @Text = "Create Network ID";
+    }
+  }
+
+  #Content {
+    LayoutMode: Top;
+    Anchor: (Height: 350);
+    Padding: (Full: 20);
+
+    Group #PrincipalPanel{
+      LayoutMode: Top;
+      Anchor: (Height: 480, Top: 120);
+
+      Label #Message1 {
+        Anchor: (Width: 210, Height: 20);
+        Text: "Examples of IDs you can use:";
+        Style: (
+          TextColor:#f9fff7,
+        );
+      }
+
+      Label #Message2 {
+        Anchor: (Width: 250, Height: 30);
+        Text: "Network11, netwoK, 12, N3tW0rK";
+        Padding: (Top: 0);
+        Style: (
+          TextColor:#f9fff7,
+        );
+      }
+
+      Group {
+        Anchor: (Width: 420);
+        LayoutMode: Top;
+        $C.@TextField #idInput{
+          Anchor: (Height: 40);
+          PlaceholderText: "Enter an ID or by default it will be:";
+        }
+      }
+
+      Group {
+        Anchor: (Width: 120);
+        LayoutMode: Center;
+        Padding: (Top: 20);
+        $C.@TextButton #SubmitID {
+          Anchor: (Height: 50);
+          Text: "Submit";
+        }
+      }
+
+
+    }
+
+
+
+  }
+}
+

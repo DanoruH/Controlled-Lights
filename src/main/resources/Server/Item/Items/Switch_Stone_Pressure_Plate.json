@@ -1,0 +1,67 @@
+{
+  "BlockType": {
+    "DrawType": "Model",
+    "CustomModel": "Items/Tools/Plate.blockymodel",
+    "CustomModelTexture": [
+      {
+        "Texture": "Items/Tools/Stone_Pressure_Plate.png"
+      }
+    ],
+    "Interactions": {
+      "CollisionEnter": {
+        "Interactions": [
+          {
+            "Type": "ChangeState",
+            "Changes": {
+              "default": "Activate",
+              "Desactivate": "Activate"
+            }
+          },
+          {
+            "Type": "SwitchLights"
+          }
+        ]
+      },
+      "CollisionLeave": {
+        "Interactions": [
+          {
+            "Type": "ChangeState",
+            "Changes": {
+              "Activate": "Desactivate"
+            }
+          },
+          {
+            "Type": "SwitchLights"
+          }
+        ]
+      }
+    },
+    "State": {
+      "Definitions": {
+        "Activate": {
+          "CustomModelAnimation": "Items/Tools/Pressure_Plate_On.blockyanim"
+        },
+        "Desactivate": {
+          "CustomModelAnimation": "Items/Tools/Pressure_Plate_Off.blockyanim"
+        }
+      }
+    },
+    "HitboxType": "Plate_Box"
+  },
+  "Icon": "Icons/ItemsGenerated/Switch_Stone_Pressure_Plate.png",
+  "IconProperties": {
+    "Scale": 0.7,
+    "Rotation": [
+      22.5,
+      45,
+      22.5
+    ],
+    "Translation": [
+      0,
+      -1
+    ]
+  },
+  "MaxStack": 100,
+  "Quality": "Rare",
+  "PlayerAnimationsId": "Block"
+}

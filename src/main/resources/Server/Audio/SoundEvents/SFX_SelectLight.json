@@ -1,0 +1,11 @@
+{
+  "Parent": "SFX_Attn_Moderate",
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Effects/selected_light.ogg"
+      ],
+      "Volume": -6
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "Parent": "SFX_Attn_Moderate",
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/Effects/disconnect_network.ogg"
+      ],
+      "Volume": -6
+    }
+  ]
+}
