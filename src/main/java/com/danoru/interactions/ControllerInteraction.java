@@ -67,6 +67,10 @@ public class ControllerInteraction extends SimpleBlockInteraction {
         NetworksComponent networksComponent = (NetworksComponent) store.getComponent(ref, NetworksComponent.getComponentType());
         if(networksComponent == null) return;
 
+        if(networksComponent.getUUIDNetwork() == null || networksComponent.getUUIDNetwork().isEmpty()) {
+            networksComponent.setUUIDNetwork(playerRef.getUuid().toString());
+        }
+
         //LÓGICA CONDICIONAL (PROX)
         if(networksComponent.isModeCreate()) {
             //LÓGICA DE CONTROLLER

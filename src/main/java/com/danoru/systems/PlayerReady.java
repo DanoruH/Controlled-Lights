@@ -31,9 +31,6 @@ public class PlayerReady extends RefSystem<EntityStore> {
         NetworksComponent networksComponent = (NetworksComponent) store.getComponent(ref, NetworksComponent.getComponentType());
         if(networksComponent == null) {
             commandBuffer.addComponent(ref, NetworksComponent.getComponentType(), new NetworksComponent());
-            if(networksComponent.getUUIDNetwork() == null) {
-                networksComponent.setUUIDNetwork(playerRef.getUuid().toString());
-            }
         }
     }
 
