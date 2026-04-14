@@ -46,6 +46,9 @@ public class NetworksComponent implements Component<EntityStore> {
             .append(new KeyedCodec<>("UuidNetwork", Codec.STRING),
                     (data, value) -> data.uuidNetwork = value,
                     (data) -> data.uuidNetwork).add()
+            .append(new KeyedCodec<>("Object_Networks", new SetCodec<>(Network.CODEC, HashSet::new, false)),
+                    (data, value) -> data.objectNetwork = value,
+                    data -> data.objectNetwork).add()
             .build();
 
     public Map<String, Vector3i> getLocalSwitches() {
