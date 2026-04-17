@@ -2,6 +2,7 @@ package com.danoru.interactions;
 
 import com.danoru.components.NetworksComponent;
 import com.danoru.ui.SubmitUI;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.RemoveReason;
@@ -28,10 +29,8 @@ import java.util.HashSet;
 import java.util.UUID;
 
 public class SwitchControllerInteracion extends SimpleInstantInteraction {
-    public static Player player;
-    public static BsonDocument metadata;
-    public static ItemStack itemStack;
-    public static String uuidSwitch;
+
+    public static final BuilderCodec<SwitchControllerInteracion> CODEC;
 
     @Override
     protected void firstRun(@NonNullDecl InteractionType interactionType, @NonNullDecl InteractionContext interactionContext, @NonNullDecl CooldownHandler cooldownHandler) {
@@ -44,24 +43,20 @@ public class SwitchControllerInteracion extends SimpleInstantInteraction {
         NetworksComponent networksComponent = (NetworksComponent) store.getComponent(ref, NetworksComponent.getComponentType());
         if(networksComponent == null) return;
 
-        ItemStack itemheld = interactionContext.getHeldItem();
-        BsonDocument metadata = itemheld.getMetadata();
-
+        ItemStack itemStack = interactionContext.getHeldItem();
+        ControllerInteraction.itemStackOrigin = itemStack;
+        ControllerInteraction.metadataOrigin = itemStack.getMetadata();
 
         if(networksComponent.isModeCreate()) {
             //LÓGICA DE CONTROLLER
-            if(interactionContext.getHeldItem().getItemId().startsWith("Switch_")){
-                if(metadata == null || metadata.isEmpty()) {
+            if(itemStack.getItem().getId().startsWith("Switch_") && itemStack != null){
+                if(ControllerInteraction.metadataOrigin == null) {
+                    ControllerInteraction.metadataOrigin = new BsonDocument();
+                }
+                if(ControllerInteraction.metadataOrigin.isEmpty() || !networksComponent.containsuuIdMetadata(ControllerInteraction.metadataOrigin)) {
                     if(!ControllerInteraction.lightsRaw.isEmpty()) {
-                        metadata = new BsonDocument();
-
-                        //PROCESO DE ENLAZAMIENTO Y ENCAPSULAMIENTO
-//                        blockPosition = "hola"; //remplazar
-                        ControllerInteraction.commandBufferOrigin = commandBuffer;
-                        ControllerInteraction.networksComponentOrigin = networksComponent;
-                        ControllerInteraction.storeOrigin = store;
+                        ControllerInteraction.isCreate_Block = false;
                         player.getPageManager().openCustomPage(ref, store, new SubmitUI(playerRef));
-//                        create_Network(networksComponent.consumeIDdefault());
                     } else {
                         SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(ControllerInteraction.SOUND_ERROR), SoundCategory.SFX, commandBuffer);
                         player.sendMessage(Message.raw("You didn't link any lights."));
@@ -70,45 +65,11 @@ public class SwitchControllerInteracion extends SimpleInstantInteraction {
                     SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(ControllerInteraction.SOUND_ERROR), SoundCategory.SFX, commandBuffer);
                     player.sendMessage(Message.raw("It's already used"));
                 }
-                return;
             }
         }
     }
 
-    public static void createNetworkWithMetadata(String id) {
-        uuidSwitch = UUID.randomUUID().toString();
-        metadata.append("Uuid",  new BsonString(uuidSwitch));
-        create_Network(id);
-        //Reemplaza el controller con METADATA
-        ItemStack modifiedController = itemStack.withMetadata(metadata);
-        player.getInventory().getHotbar().setItemStackForSlot(player.getInventory().getActiveHotbarSlot(),  modifiedController);
-    }
-
-    public static void removeUUIDMetadata( String uuID) {
-        ItemContainer itemContainer = player.getInventory().getCombinedHotbarFirst();
-        short capacity = itemContainer.getCapacity();
-        for(short slot = 0; slot < capacity; slot++){
-            ItemStack item = itemContainer.getItemStack(slot);
-
-            BsonDocument metadata = item.getMetadata();
-            if(metadata != null || !metadata.isEmpty()) {
-                String uuid = metadata.get("Uuid").asString().getValue();
-                if(uuid.equals(uuID)) {
-                    metadata.remove("Uuid");
-                    break;
-                }
-            }
-        }
-    }
-
-    private static void create_Network(String id) {
-        ControllerInteraction.networksComponentOrigin.setNetwork(id, new HashSet<>(ControllerInteraction.lightsRaw), uuidSwitch);
-        ControllerInteraction.lightsRaw.clear();
-        for (Ref<EntityStore> entities : ControllerInteraction.models) {
-            ControllerInteraction.commandBufferOrigin.run((o) -> ControllerInteraction.commandBufferOrigin.removeEntity(entities, RemoveReason.REMOVE));
-        }
-        ControllerInteraction.uid_models.clear();
-        ControllerInteraction.models.clear();
-        SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(ControllerInteraction.SOUND_LINKED), SoundCategory.SFX, ControllerInteraction.commandBufferOrigin);
+    static {
+        CODEC = BuilderCodec.builder(SwitchControllerInteracion.class, SwitchControllerInteracion::new, SimpleInstantInteraction.CODEC).build();
     }
 }

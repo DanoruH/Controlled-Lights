@@ -1,5 +1,6 @@
 package com.danoru.interactions;
 
+import com.danoru.codecs.Network;
 import com.danoru.components.NetworksComponent;
 import com.danoru.ui.SubmitUI;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -26,12 +27,15 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class ControllerInteraction extends SimpleBlockInteraction {
     public static final BuilderCodec<ControllerInteraction> CODEC =
@@ -45,10 +49,16 @@ public class ControllerInteraction extends SimpleBlockInteraction {
     public static final String SOUND_LINKED = "SFX_LinkedBlock";
     public static final String SOUND_ERROR = "SFX_Error";
 
-    public static Vector3i blockPosition;
+    public static Vector3i block_Switch;
+    public static String wireless_Switch;
+    public static boolean isCreate_Block = true;
     public static CommandBuffer<EntityStore> commandBufferOrigin;
     public static Store<EntityStore> storeOrigin;
     public static NetworksComponent networksComponentOrigin;
+    public static BlockType blockTypeOrigin;
+    public static Player playerOrigin;
+    public static BsonDocument metadataOrigin;
+    public static ItemStack itemStackOrigin;
 
     @Override
     protected void interactWithBlock(@NonNullDecl World world, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, @NonNullDecl InteractionType interactionType, @NonNullDecl InteractionContext interactionContext, @NullableDecl ItemStack itemStack, @NonNullDecl Vector3i target_block, @NonNullDecl CooldownHandler cooldownHandler) {
@@ -71,19 +81,22 @@ public class ControllerInteraction extends SimpleBlockInteraction {
             networksComponent.setUUIDNetwork(playerRef.getUuid().toString());
         }
 
+        //Variables Origenes
+        block_Switch = target_block;
+        commandBufferOrigin = commandBuffer;
+        networksComponentOrigin = networksComponent;
+        storeOrigin = store;
+        blockTypeOrigin = blockType;
+        playerOrigin = player;
+
         //LÓGICA CONDICIONAL (PROX)
         if(networksComponent.isModeCreate()) {
-            //LÓGICA DE CONTROLLER
+            //LÓGICA DE CONTROLLER, VERIFICAR SI EL CONTROLLER ES UN ITEM O BLOQUE
             if(blockType.getItem().getId().startsWith("Switch_")){
-                if(!networksComponent.getLocalSwitches().containsValue(target_block)){
+                if(!networksComponent.containsSwitchBlock(block_Switch)){
                     if(!lightsRaw.isEmpty()) {
-                        //PROCESO DE ENLAZAMIENTO Y ENCAPSULAMIENTO
-                        blockPosition = target_block;
-                        commandBufferOrigin = commandBuffer;
-                        networksComponentOrigin = networksComponent;
-                        storeOrigin = store;
+                        isCreate_Block = true;
                         player.getPageManager().openCustomPage(ref, store, new SubmitUI(playerRef));
-//                        create_Network(networksComponent.consumeIDdefault());
                     } else {
                         SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(SOUND_ERROR), SoundCategory.SFX, commandBuffer);
                         player.sendMessage(Message.raw("You didn't link any lights."));
@@ -150,7 +163,16 @@ public class ControllerInteraction extends SimpleBlockInteraction {
     }
 
     public static void create_Network(String id) {
-        networksComponentOrigin.setNetwork(id, new HashSet<>(lightsRaw), blockPosition);
+        if(isCreate_Block) {
+            networksComponentOrigin.setNetwork(id, new HashSet<>(lightsRaw), block_Switch, blockTypeOrigin.getItem().getId()); //CREANDO
+        } else {
+            wireless_Switch = UUID.randomUUID().toString();
+            metadataOrigin.append("Uuid", new BsonString(wireless_Switch));
+            networksComponentOrigin.setNetwork(id, new HashSet<>(lightsRaw), wireless_Switch, itemStackOrigin.getItem().getId()); //CREANDO
+            //Reemplaza el controller con METADATA
+            ItemStack modifiedController = itemStackOrigin.withMetadata(metadataOrigin);
+            playerOrigin.getInventory().getHotbar().setItemStackForSlot(playerOrigin.getInventory().getActiveHotbarSlot(),  modifiedController);
+        }
         lightsRaw.clear();
         for (Ref<EntityStore> entities : models) {
             commandBufferOrigin.run((o) -> commandBufferOrigin.removeEntity(entities, RemoveReason.REMOVE));
@@ -159,6 +181,7 @@ public class ControllerInteraction extends SimpleBlockInteraction {
         models.clear();
         SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(SOUND_LINKED), SoundCategory.SFX, commandBufferOrigin);
     }
+
 
     @Override
     protected void simulateInteractWithBlock(@NonNullDecl InteractionType interactionType, @NonNullDecl InteractionContext interactionContext, @NullableDecl ItemStack itemStack, @NonNullDecl World world, @NonNullDecl Vector3i vector3i) {

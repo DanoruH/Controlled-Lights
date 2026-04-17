@@ -55,13 +55,13 @@ public class UIGallery extends InteractiveCustomUIPage<UIGallery.UIGalleryEventD
         NetworksComponent networksComponent = (NetworksComponent) store.getComponent(ref, NetworksComponent.getComponentType());
         Player player = store.getComponent(ref, Player.getComponentType());
         UICommandBuilder cmd = new UICommandBuilder();
+        UIEventBuilder cmdEvent = new UIEventBuilder();
 
         //Ver que Network seleccionaste
-        for(int i = 0; i < networksComponent.getIdNetworks().size(); i++) {
+        for(int i = 0; i < networksComponent.getNetworks().size(); i++) {
             if(("Select" + i).equals(data.action)) {
                 selected = String.valueOf(i);
                 cmd.set("#NetworkList[" + selected + "] #SelectedButton.Disabled", true);
-                player.sendMessage(Message.raw("Seleccionado a Network: " + i));
                 if(!selected.equals(lastSelected)) {
                     if(lastSelected != null) {
                         cmd.set("#NetworkList[" + lastSelected + "] #SelectedButton.Disabled", false);
@@ -85,24 +85,22 @@ public class UIGallery extends InteractiveCustomUIPage<UIGallery.UIGalleryEventD
 
         if("remove".equals(data.action)) {
             if(selected != null) {
-                player.sendMessage(Message.raw("PASE POR AQUI"));
                 networksComponent.removeNetwork(networksComponent.getIdForIndex(selected));
-                cmd.clear("#NetworkList[" + selected + "]");
-                selected = null;
+                player.getPageManager().setPage(ref, store, Page.None);
             }
         }
-        updateInfo(selected, cmd, networksComponent, store);
 
+        updateInfo(selected, cmd, networksComponent, store);
         this.sendUpdate(cmd, null, false);
     }
 
     private void update(NetworksComponent networksComponent, UICommandBuilder uiCommandBuilder, UIEventBuilder uiEventBuilder) {
         int index = 0;
-        if(!networksComponent.getIdNetworks().isEmpty()) {
-            for(var networks : networksComponent.getIdNetworks()) {
+        if(!networksComponent.getNetworks().isEmpty()) {
+            for(var networks : networksComponent.getNetworks()) {
                 uiCommandBuilder.append("#NetworkList", "HUI/NetworkEntry.ui");
 
-                uiCommandBuilder.set("#NetworkList[" + index + "] #NetworkLabel.Text", "Network: " + networks);
+                uiCommandBuilder.set("#NetworkList[" + index + "] #NetworkLabel.Text", "Network: " + networks.getId());
                 uiCommandBuilder.set("#NetworkList[" + index + "] #NetworkIndex.Text", "Index: " + index);
 
                 uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
@@ -119,12 +117,11 @@ public class UIGallery extends InteractiveCustomUIPage<UIGallery.UIGalleryEventD
             World world = store.getExternalData().getWorld();
             String id = networksComponent.getIdForIndex(selected);
             //INFO TOTAL LIGHTS
-            int total = networksComponent.getLocalLights().get(id).size();
+            int total = networksComponent.getNetworkForId(id).getLights().size();
             uiCommandBuilder.set("#Total.Text", "TOTAL: " + total);
 
             //INFO ICON SWITCH
-            BlockType blockType = world.getBlockType(networksComponent.getLocalSwitches().get(id));
-            uiCommandBuilder.set("#Icon.ItemId", blockType.getItem().getId().toString());
+            uiCommandBuilder.set("#Icon.ItemId", networksComponent.getNetworkForId(id).getIdItem());
         }
 
     }

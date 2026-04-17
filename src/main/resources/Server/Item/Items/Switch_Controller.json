@@ -15,18 +15,38 @@
     ]
   },
   "MaxStack": 1,
-  "PlayerAnimationsId": "Item",
+  "PlayerAnimationsId": "Item_Controller",
   "Interactions": {
-    "Secondary": {
+    "Primary": {
       "Interactions": [
         {
-          "Type": "ControllerLights"
+          "Type": "SwitchController"
         }
       ]
+    },
+    "Use": {
+      "Interactions": [
+        {
+          "Type": "Serial",
+          "Interactions": [
+            {
+              "Type": "Simple",
+              "Effects": {
+                "ItemAnimationId": "PushController"
+              },
+              "RunTime": 0.2
+            },
+            {
+              "Type": "SwitchWirelessLights"
+            }
+          ]
+        }
+      ],
+      "RequireNewClick": true
     }
   },
   "TranslationProperties": {
-    "Name": "server.items.Controller.name"
+    "Name": "Switch_Controller"
   },
   "Quality": "Rare",
   "Categories": [

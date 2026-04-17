@@ -1,11 +1,13 @@
 package com.danoru.config;
 
+import com.danoru.codecs.Network;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
 import com.hypixel.hytale.codec.codecs.set.SetCodec;
 import com.hypixel.hytale.math.vector.Vector3i;
+import org.bson.BsonDocument;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,58 +16,59 @@ import java.util.Set;
 
 public class LightsConfig {
     public static final BuilderCodec<LightsConfig> CODEC = BuilderCodec.builder(LightsConfig.class, LightsConfig::new)
-            .append(new KeyedCodec<>("Global_Switches", new MapCodec<>(new MapCodec<>(Vector3i.CODEC, HashMap::new, false), HashMap::new, false)),
-                    (data, value) -> data.globalSwitches = value,
-                    (   data) -> data.globalSwitches).add()
-            .append(new KeyedCodec<>("Global_Lights", new MapCodec<>(new MapCodec<>(new SetCodec<>(Vector3i.CODEC, HashSet::new, false), HashMap::new, false), HashMap::new, false)),
-                    (data, value) -> data.globalLights = value,
-                    (data) -> data.globalLights).add()
-            .append(new KeyedCodec<>("Global_IdNetworks", new MapCodec<>(new SetCodec<>(Codec.STRING, HashSet::new, false), HashMap::new, false)),
-                    (data, value) -> data.globalIdNetworks = value,
-                    (data) -> data.globalIdNetworks).add()
+            .append(new KeyedCodec<>("Global_Networks", new MapCodec<>(new SetCodec<>(Network.CODEC, HashSet::new, false), HashMap::new, false)),
+                    (data, value) -> data.globalNetworks = value,
+                    data -> data.globalNetworks).add()
             .build();
 
-    private Map<String, Map<String, Vector3i>> globalSwitches = new HashMap<>();
-    private Map<String, Map<String, Set<Vector3i>>> globalLights = new HashMap<>();
-    private Map<String, Set<String>> globalIdNetworks = new HashMap<>();
+    private Map<String, Set<Network>> globalNetworks = new HashMap<>();
 
-    public Map<String, Map<String, Vector3i>> getGlobalSwitches() {
-        return globalSwitches;
+    public void setGlobalNetwork(String uuId,Set<Network> localNetworks) {
+        globalNetworks.put(uuId, localNetworks);
     }
-    public Map<String, Map<String, Set<Vector3i>>> getGlobalLights() {
-        return globalLights;
-    }
-    public Map<String, Set<String>> getGlobalIdNetworks() {
-        return globalIdNetworks;
+    public void clearGlobalNetwork(String uuId) {
+        globalNetworks.remove(uuId);
     }
 
-    public void setGlobalNetwork(String uuID, Map<String, Vector3i> switches, Map<String, Set<Vector3i>> lights, Set<String> idNetworks) {
-        globalSwitches.put(uuID, switches);
-        globalLights.put(uuID, lights);
-        globalIdNetworks.put(uuID, idNetworks);
-    }
-    public void clearGlobalNetwork(String uuID) {
-        globalSwitches.remove(uuID);
-        globalLights.remove(uuID);
-        globalIdNetworks.remove(uuID);
-    }
-
+    //POR ARREGLAR
     public boolean containsGlobalSwitchValue(Vector3i targetBlock) {
-        for(Map<String, Vector3i> switchLocal : globalSwitches.values()){
-            if(switchLocal.containsValue(targetBlock)) {
-                return true;
+        for(Set<Network> networks : globalNetworks.values()) {
+            for(Network local : networks) {
+                if(local.getSwitchBlock().equals(targetBlock)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    public boolean containsGlobalSwitchValue(BsonDocument metadata) {
+        for(Set<Network> networks : globalNetworks.values()) {
+            for(Network local : networks) {
+                String id = metadata.get("Uuid").asString().getValue();
+                if(local.getSwitchWireless().equals(id)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
     public String getIdforSwitchGlobal(Vector3i posSwitch) {
-        for(String id: globalSwitches.keySet()){
-            Map<String, Vector3i> switchLocal = globalSwitches.get(id);
-
-            for(String idNetwork: switchLocal.keySet()) {
-                if(switchLocal.get(idNetwork).equals(posSwitch)) {
-                    return idNetwork;
+        for(Set<Network> networks : globalNetworks.values()) {
+            for(Network local : networks) {
+                if(local.getSwitchBlock().equals(posSwitch)) {
+                    return local.getId();
+                }
+            }
+        }
+        return null;
+    }
+    public String getIdforSwitchLocal(BsonDocument metadata) {
+        for(Set<Network> networks : globalNetworks.values()) {
+            for(Network local : networks) {
+                String id = metadata.get("Uuid").asString().getValue();
+                if(local.getSwitchWireless().equals(id)) {
+                    return local.getId();
                 }
             }
         }
@@ -73,9 +76,11 @@ public class LightsConfig {
     }
 
     public Set<Vector3i> getLightsForID(String idNetwork) {
-        for(Map<String, Set<Vector3i>> lightnetworks : globalLights.values()){
-            if (lightnetworks.containsKey(idNetwork)) {
-                return lightnetworks.get(idNetwork);
+        for(Set<Network> networks : globalNetworks.values()) {
+            for(Network local : networks) {
+                if(local.getId().equals(idNetwork)) {
+                    return local.getLights();
+                }
             }
         }
         return null;

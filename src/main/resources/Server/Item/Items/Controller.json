@@ -15,7 +15,7 @@
     ]
   },
   "MaxStack": 1,
-  "PlayerAnimationsId": "Item",
+  "PlayerAnimationsId": "Item_Controller",
   "Interactions": {
     "Secondary": {
       "Interactions": [
@@ -27,7 +27,19 @@
     "Use": {
       "Interactions": [
         {
-          "Type": "InterfaceLights"
+          "Type": "Serial",
+          "Interactions": [
+            {
+              "Type": "Simple",
+              "Effects": {
+                "ItemAnimationId": "PushMenu"
+              },
+              "RunTime": 0.25
+            },
+            {
+              "Type": "InterfaceLights"
+            }
+          ]
         }
       ]
     }

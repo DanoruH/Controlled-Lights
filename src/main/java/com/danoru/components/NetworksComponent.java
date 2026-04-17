@@ -1,6 +1,7 @@
 package com.danoru.components;
 
 import com.danoru.ControlledLights;
+import com.danoru.codecs.Network;
 import com.danoru.config.LightsConfig;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -10,8 +11,10 @@ import com.hypixel.hytale.codec.codecs.set.SetCodec;
 import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.math.vector.Vector3i;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.Config;
+import org.bson.BsonDocument;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import java.util.HashMap;
@@ -20,10 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class NetworksComponent implements Component<EntityStore> {
-    private Map<String, Vector3i> localSwitches;
-    private Map<String, String> localSwitches_Remote;
-    private Map<String, Set<Vector3i>> localLights;
-    private Set<String> idNetworks;
+    private Set<Network> networks;
 
     private boolean modeCreate = false;
     private boolean modeEdit = false;
@@ -31,34 +31,19 @@ public class NetworksComponent implements Component<EntityStore> {
     private String uuidNetwork = null;
 
     public static BuilderCodec<NetworksComponent> CODEC = BuilderCodec.builder(NetworksComponent.class, NetworksComponent::new)
-            .append(new KeyedCodec<>("LocalSwitches", new MapCodec<>(Vector3i.CODEC, HashMap::new, false)),
-                    (data, value) -> data.localSwitches = value,
-                    data -> data.localSwitches).add()
-            .append(new KeyedCodec<>("LocalLights", new MapCodec<>(new SetCodec<>(Vector3i.CODEC, HashSet::new, false), HashMap::new, false)),
-                    (data, value) -> data.localLights = value,
-                    data -> data.localLights).add()
-            .append(new KeyedCodec<>("IdNetworks", new SetCodec<>(Codec.STRING, HashSet::new, false)),
-                    (data, value) -> data.idNetworks = value,
-                    data -> data.idNetworks).add()
+            .append(new KeyedCodec<>("Networks", new SetCodec<>(Network.CODEC, HashSet::new, false)),
+                    (data, value) -> data.networks = value,
+                    data -> data.networks).add()
             .append(new KeyedCodec<>("IDdefault", Codec.SHORT),
                     (data, value) -> data.idDefault = value,
                     data -> data.idDefault).add()
             .append(new KeyedCodec<>("UuidNetwork", Codec.STRING),
                     (data, value) -> data.uuidNetwork = value,
                     (data) -> data.uuidNetwork).add()
-            .append(new KeyedCodec<>("Object_Networks", new SetCodec<>(Network.CODEC, HashSet::new, false)),
-                    (data, value) -> data.objectNetwork = value,
-                    data -> data.objectNetwork).add()
             .build();
 
-    public Map<String, Vector3i> getLocalSwitches() {
-        return localSwitches;
-    }
-    public Map<String, Set<Vector3i>> getLocalLights() {
-        return localLights;
-    }
-    public Set<String> getIdNetworks() {
-        return idNetworks;
+    public Set<Network> getNetworks() {
+        return networks;
     }
     public short getIdDefault() {
         return idDefault;
@@ -82,37 +67,48 @@ public class NetworksComponent implements Component<EntityStore> {
         this.uuidNetwork = UUIDNetwork;
     }
 
-    public void setNetwork(String id, Set<Vector3i> listLights, Vector3i switchNetwork) {
-        localSwitches.put(id, switchNetwork);
-        localLights.put(id, listLights);
-        idNetworks.add(id);
+    //FUNCIÓN PARA SWITCH TIPO BLOQUE
+    public void setNetwork(String id, Set<Vector3i> listLights, Vector3i switchNetwork, String itemID) {
+        Network network = new Network();
+        network.setId(id);
+        network.setLights(listLights);
+        network.setSwitchBlock(switchNetwork);
+        network.setIdItem(itemID);
+
+        this.networks.add(network);
         updateGlobalNetwork();
     }
 
-    public void setNetwork(String id, Set<Vector3i> listLights, String switchRemoteNetwork) {
-        localSwitches_Remote.put(id, switchRemoteNetwork);
-        localLights.put(id, listLights);
-        idNetworks.add(id);
+    //FUNCIÓN PARA SWITCH TIPO ITEM
+    public void setNetwork(String id, Set<Vector3i> listLights, String switchWirelessUUID, String itemID) {
+        Network network = new Network();
+        network.setId(id);
+        network.setLights(listLights);
+        network.setSwitchWireless(switchWirelessUUID);
+        network.setIdItem(itemID);
+
+        this.networks.add(network);
         updateGlobalNetwork();
     }
 
     private void updateGlobalNetwork() {
         Config<LightsConfig> myconfig = ControlledLights.instance.getConfig();
         LightsConfig config = myconfig.get();
-        config.setGlobalNetwork(uuidNetwork, localSwitches, localLights, idNetworks);
+        config.setGlobalNetwork(uuidNetwork, networks);
         myconfig.save();
     }
 
     public void removeNetwork(String id) {
-        localLights.remove(id);
-        localSwitches.remove(id);
-        idNetworks.remove(id);
+        for(Network local : networks) {
+            if(local.getId().equals(id)) {
+                networks.remove(local);
+                break;
+            }
+        }
         updateGlobalNetwork();
     }
     public void removeAllNetworks() {
-        localSwitches.clear();
-        localLights.clear();
-        idNetworks.clear();
+        networks.clear();
         clearGlobalNetwork();
     }
     private void clearGlobalNetwork() {
@@ -122,17 +118,74 @@ public class NetworksComponent implements Component<EntityStore> {
         myconfig.save();
     }
 
+    public boolean containsSwitchBlock(Vector3i switchPos) {
+        for(Network local : networks) {
+            if(local.getSwitchBlock().equals(switchPos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean containsIds(String id) {
+        for(Network local : networks) {
+            if(local.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean containsuuIdMetadata(BsonDocument metadata) {
+        String meta = metadata.get("Uuid").asString().getValue();
+        if(meta != null) {
+            for(Network local : networks) {
+                if(local.getSwitchWireless().equals(meta)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public String getIdForSwitch(Vector3i posSwitch) {
-        for(String key:idNetworks) {
-            if(getLocalSwitches().get(key).equals(posSwitch)){
-                return key;
+        for(Network local : networks) {
+            if(local.getSwitchBlock().equals(posSwitch)) {
+                return local.getId();
             }
         }
         return "null";
     }
+    public String getIdForSwitch(BsonDocument metadata) {
+        for(Network local : networks) {
+            String uuid = metadata.get("Uuid").asString().getValue();
+            if(local.getSwitchWireless().equals(uuid)) {
+                return local.getId();
+            }
+        }
+        return "null";
+    }
+
+//    public String getIdForSwitchWireless(String uuidSwitch) {
+//        for(String key:idNetworks) {
+//            if(getLocalSwitchesWireless().get(key).equals(uuidSwitch)){
+//                return key;
+//            }
+//        }
+//        return "null";
+//    }
+//
+    public Network getNetworkForId(String id) {
+        for(Network local : networks) {
+            if(local.getId().equals(id)) {
+                return local;
+            }
+        }
+        return null;
+    }
+
     public String getIdForIndex(String index) {
         short ind = 0;
-        for(String id : idNetworks) {
+        for(Network local : networks) {
+            String id = local.getId();
             if(String.valueOf(ind).equals(index)) {
                 return id;
             }
@@ -140,6 +193,14 @@ public class NetworksComponent implements Component<EntityStore> {
         }
         return null;
     }
+
+//    public String getIDforItem(ItemStack itemStack) {
+//        BsonDocument metadata = itemStack.getMetadata();
+//        if(metadata != null) {
+//            return metadata.get("Uuid").asString().getValue();
+//        }
+//        return null;
+//    }
 
     public String consumeIDdefault() {
         String idConsume = String.valueOf(idDefault);
@@ -152,24 +213,16 @@ public class NetworksComponent implements Component<EntityStore> {
     }
 
     public NetworksComponent() {
-        localSwitches = new HashMap<>();
-        localLights = new HashMap<>();
-        idNetworks = new HashSet<>();
-    }
-
-    @Override
-    public String toString() {
-        return "SWITCHES: " + localSwitches.toString() +"\n LIGHTS: " + localLights.toString() +"\n IDNETWORKS: " + idNetworks.toString();
+        networks = new HashSet<>();
     }
 
     @NullableDecl
     @Override
     public Component<EntityStore> clone() {
         NetworksComponent copy = new NetworksComponent();
-        copy.localLights = this.localLights;
-        copy.localSwitches = this.localSwitches;
-        copy.idNetworks = this.idNetworks;
         copy.idDefault = this.idDefault;
+        copy.networks = this.networks;
+        copy.uuidNetwork = this.uuidNetwork;
         return copy;
     }
 }

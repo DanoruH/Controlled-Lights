@@ -38,17 +38,14 @@ public class SwitchInteraction extends SimpleBlockInteraction {
         LightsConfig config = myconfig.get();
 
         NetworksComponent networksComponent = (NetworksComponent) store.getComponent(ref, NetworksComponent.getComponentType());
-
         if(networksComponent == null) return;
 
         if(blockType.getItem().getId().startsWith("Switch_")){
-
-            if(networksComponent.getLocalSwitches().containsValue(targetBlock) ){
-                String keyNetwork = networksComponent.getIdForSwitch(targetBlock);
-                Set<Vector3i> lights = networksComponent.getLocalLights().get(keyNetwork);
+            if(networksComponent.containsSwitchBlock(targetBlock) ){
+                String id = networksComponent.getIdForSwitch(targetBlock);
+                Set<Vector3i> lights = networksComponent.getNetworkForId(id).getLights();
                 switchLights(lights, world);
             } else if(config.containsGlobalSwitchValue(targetBlock)) {
-                player.sendMessage(Message.raw("PASE POR AQUI"));
                 String keyNetwork = config.getIdforSwitchGlobal(targetBlock);
                 Set<Vector3i> lights = config.getLightsForID(keyNetwork);
                 switchLights(lights, world);
@@ -56,7 +53,7 @@ public class SwitchInteraction extends SimpleBlockInteraction {
         }
     }
 
-    private void switchLights(Set<Vector3i> lights, World world) {
+    public static void switchLights(Set<Vector3i> lights, World world) {
         for(Vector3i pos : lights) {
             BlockType blockType1 = world.getBlockType(pos);
             if(blockType1.getStateForBlock(blockType1) == null) {

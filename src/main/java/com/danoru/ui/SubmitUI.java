@@ -58,7 +58,7 @@ public class SubmitUI extends InteractiveCustomUIPage<SubmitUI.SubmitUIEventData
 
         //CREA LA RED
         if(networksComponent.isModeCreate()){
-            if(!networksComponent.getIdNetworks().contains(id)){
+            if(!networksComponent.containsIds(id)){
                 //VERIFICA SI PUSO UN ID O NO Y LO CREA
                 if(id.equalsIgnoreCase("")){
                     String idDef = networksComponent.consumeIDdefault();
@@ -67,13 +67,10 @@ public class SubmitUI extends InteractiveCustomUIPage<SubmitUI.SubmitUIEventData
                     ControllerInteraction.create_Network(id);
                 }
 
+
                 //DEFINE EL MODO CREATE EN FALSO Y REDIRIGE AL MENU PRINCIPAL
                 networksComponent.setModeCreate(false);
                 player.getPageManager().openCustomPage(ref, store, new UIGallery(playerRef));
-
-//                player.sendMessage(Message.raw("IDs: " + networksComponent.getIdNetworks()));
-//                player.sendMessage(Message.raw("Switchs: " + networksComponent.getLocalSwitches()));
-//                player.sendMessage(Message.raw("Lights: " + networksComponent.getLocalLights()));
             } else {
                 String message2 = "Invalid ID: This ID already exists.";
                 cmd.set("#Message1.Text", "");

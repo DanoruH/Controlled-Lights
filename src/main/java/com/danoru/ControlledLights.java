@@ -3,9 +3,7 @@ package com.danoru;
 import com.danoru.components.NetworksComponent;
 import com.danoru.config.LightsConfig;
 import com.danoru.events.BreakEvent;
-import com.danoru.interactions.ControllerInteraction;
-import com.danoru.interactions.InterfaceInteraction;
-import com.danoru.interactions.SwitchInteraction;
+import com.danoru.interactions.*;
 import com.danoru.systems.PlayerReady;
 import com.danoru.watcher.PlayerHotbarWatcher;
 import com.hypixel.hytale.component.ComponentType;
@@ -40,6 +38,8 @@ public class ControlledLights extends JavaPlugin {
         this.getCodecRegistry(Interaction.CODEC).register("ControllerLights", ControllerInteraction.class, ControllerInteraction.CODEC);
         this.getCodecRegistry(Interaction.CODEC).register("SwitchLights", SwitchInteraction.class, SwitchInteraction.CODEC);
         this.getCodecRegistry(Interaction.CODEC).register("InterfaceLights", InterfaceInteraction.class, InterfaceInteraction.CODEC);
+        this.getCodecRegistry(Interaction.CODEC).register("SwitchController", SwitchControllerInteracion.class, SwitchControllerInteracion.CODEC);
+        this.getCodecRegistry(Interaction.CODEC).register("SwitchWirelessLights", SwitchWirelessInteraction.class, SwitchWirelessInteraction.CODEC);
         this.getEntityStoreRegistry().registerSystem(new PlayerReady(config));
         this.getEntityStoreRegistry().registerSystem(new BreakEvent());
 

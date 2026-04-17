@@ -39,12 +39,10 @@ public class BreakEvent extends EntityEventSystem<EntityStore, BreakBlockEvent> 
         if(networksComponent == null) return;
         if(blockType.getItem() == null) return;
 
-        if(blockType.getItem().getId().equalsIgnoreCase("Switch_Light")){
-            if(networksComponent.getLocalSwitches().containsValue(targetBlock)){
-                player.sendMessage(Message.raw(networksComponent.toString()));
+        if(blockType.getItem().getId().startsWith("Switch_")){
+            if(networksComponent.containsSwitchBlock(targetBlock)){
                 networksComponent.removeNetwork(networksComponent.getIdForSwitch(targetBlock));
                 SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(SOUND_DISCONNECT), SoundCategory.SFX, commandBuffer);
-                player.sendMessage(Message.raw("Broken, unliked"));
             }
         }
     }
