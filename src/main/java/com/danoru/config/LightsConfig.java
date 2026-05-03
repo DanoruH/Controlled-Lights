@@ -42,6 +42,9 @@ public class LightsConfig {
         return false;
     }
     public boolean containsGlobalSwitchValue(BsonDocument metadata) {
+        if(metadata == null) {
+            return false;
+        }
         for(Set<Network> networks : globalNetworks.values()) {
             for(Network local : networks) {
                 String id = metadata.get("Uuid").asString().getValue();

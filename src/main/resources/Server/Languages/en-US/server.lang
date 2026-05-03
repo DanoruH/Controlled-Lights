@@ -1,2 +1,25 @@
 items.Controller.name=Controller
-items.Switch_Light.name=Switch
+items.Switch_Light.name=Toggle Switch
+items.Switch_Basalt_Pressure_Plate.name=Basalt Pressure Plate
+items.Switch_Chalk_Pressure_Plate.name=Chalk Pressure Plate
+items.Switch_Darkwood_Pressure_Plate.name=Darkwood Pressure Plate
+items.Switch_Deadwood_Pressure_Plate.name=Deadwood Pressure Plate
+items.Switch_Drywood_Pressure_Plate.name=Drywood Pressure Plate
+items.Switch_Goldenwood_Pressure_Plate.name=Goldenwood Pressure Plate
+items.Switch_Greenwood_Pressure_Plate.name=Greenwood Pressure Plate
+items.Switch_Hardwood_Pressure_Plate.name=Hardwood Pressure Plate
+items.Switch_Lightwood_Pressure_Plate.name=Lightwood Pressure Plate
+items.Switch_Marble_Pressure_Plate.name=Marble Pressure Plate
+items.Switch_Redwood_Pressure_Plate.name=Redwood Pressure Plate
+items.Switch_Stone_Pressure_Plate.name=Stone Pressure Plate
+items.Switch_Tropicalwood_Pressure_Plate.name=Tropicalwood Pressure Plate
+items.Switch_Blackwood_Pressure_Plate.name=Blackwood Pressure Plate
+items.Switch_Volcanic_Pressure_Plate.name=Volcanic Pressure Plate
+items.Switch_Softwood_Pressure_Plate.name=Softwood Pressure Plate
+
+items.Switch_Adamantite_Toggle_Pressure_Plate.name=Adamantite Toggle Pressure Plate
+items.Switch_Iron_Toggle_Pressure_Plate.name=Iron Toggle Pressure Plate
+items.Switch_Copper_Toggle_Pressure_Plate.name=Copper Toggle Pressure Plate
+items.Switch_Gold_Toggle_Pressure_Plate.name=Gold Toggle Pressure Plate
+items.Switch_Thorium_Toggle_Pressure_Plate.name=Thorium Toggle Pressure Plate
+items.Switch_Cobalt_Toggle_Pressure_Plate.name=Cobalt Toggle Pressure Plate

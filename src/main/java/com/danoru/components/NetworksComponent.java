@@ -135,6 +135,10 @@ public class NetworksComponent implements Component<EntityStore> {
         return false;
     }
     public boolean containsuuIdMetadata(BsonDocument metadata) {
+        if(metadata == null) {
+            return false;
+        }
+
         String meta = metadata.get("Uuid").asString().getValue();
         if(meta != null) {
             for(Network local : networks) {
