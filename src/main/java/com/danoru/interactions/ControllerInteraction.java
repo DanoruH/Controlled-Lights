@@ -59,6 +59,7 @@ public class ControllerInteraction extends SimpleBlockInteraction {
     public static Player playerOrigin;
     public static BsonDocument metadataOrigin;
     public static ItemStack itemStackOrigin;
+    public static PlayerRef playerRefOrigin;
 
     @Override
     protected void interactWithBlock(@NonNullDecl World world, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, @NonNullDecl InteractionType interactionType, @NonNullDecl InteractionContext interactionContext, @NullableDecl ItemStack itemStack, @NonNullDecl Vector3i target_block, @NonNullDecl CooldownHandler cooldownHandler) {
@@ -88,6 +89,7 @@ public class ControllerInteraction extends SimpleBlockInteraction {
         storeOrigin = store;
         blockTypeOrigin = blockType;
         playerOrigin = player;
+        playerRefOrigin = playerRef;
 
         //LÓGICA CONDICIONAL (PROX)
         if(networksComponent.isModeCreate()) {
@@ -98,11 +100,11 @@ public class ControllerInteraction extends SimpleBlockInteraction {
                         isCreate_Block = true;
                         player.getPageManager().openCustomPage(ref, store, new SubmitUI(playerRef));
                     } else {
-                        SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(SOUND_ERROR), SoundCategory.SFX, commandBuffer);
+                        SoundUtil.playSoundEvent2dToPlayer(playerRef, SoundEvent.getAssetMap().getIndex(SOUND_ERROR), SoundCategory.SFX);
                         player.sendMessage(Message.raw("You didn't link any lights."));
                     }
                 } else {
-                    SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(SOUND_ERROR), SoundCategory.SFX, commandBuffer);
+                    SoundUtil.playSoundEvent2dToPlayer(playerRef, SoundEvent.getAssetMap().getIndex(SOUND_ERROR), SoundCategory.SFX);
                     player.sendMessage(Message.raw("It's already used"));
                 }
                 return;
@@ -117,7 +119,7 @@ public class ControllerInteraction extends SimpleBlockInteraction {
                     lightsRaw.add(target_block);
                     uid_models.put(target_block, uuidComponent);
                     commandBuffer.run((o) -> models.add(commandBuffer.addEntity(vmodel, AddReason.SPAWN)));
-                    SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(SOUND_SELECT), SoundCategory.SFX, commandBuffer);
+                    SoundUtil.playSoundEvent2dToPlayer(playerRef, SoundEvent.getAssetMap().getIndex(SOUND_SELECT), SoundCategory.SFX);
                 } else {
                     //REMOVIENDO EL BLOQUE VISUAL "SELECTED"
                     Ref<EntityStore> ref1 = getEntityModel(target_block);
@@ -179,7 +181,7 @@ public class ControllerInteraction extends SimpleBlockInteraction {
         }
         uid_models.clear();
         models.clear();
-        SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(SOUND_LINKED), SoundCategory.SFX, commandBufferOrigin);
+        SoundUtil.playSoundEvent2dToPlayer(playerRefOrigin, SoundEvent.getAssetMap().getIndex(SOUND_LINKED), SoundCategory.SFX);
     }
 
 

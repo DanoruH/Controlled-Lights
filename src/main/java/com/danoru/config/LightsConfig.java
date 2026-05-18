@@ -67,6 +67,9 @@ public class LightsConfig {
         return null;
     }
     public String getIdforSwitchLocal(BsonDocument metadata) {
+        if(!metadata.containsKey("Uuid")) {
+            return null;
+        }
         for(Set<Network> networks : globalNetworks.values()) {
             for(Network local : networks) {
                 String id = metadata.get("Uuid").asString().getValue();

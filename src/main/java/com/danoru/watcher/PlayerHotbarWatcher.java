@@ -24,25 +24,27 @@ public class PlayerHotbarWatcher implements PlayerPacketWatcher {
                     short before = (short) chain.activeHotbarSlot;
                     short current = (short) chain.data.targetSlot;
 
-                    World world = Universe.get().getWorld(playerRef.getWorldUuid());
-                    if(world == null) return;
+                    if(before >= 0 && current >= 0){
+                        World world = Universe.get().getWorld(playerRef.getWorldUuid());
+                        if(world == null) return;
 
-                    world.execute(() -> {
-                        Ref<EntityStore> ref = playerRef.getReference();
-                        Player player = ref.getStore().getComponent(ref, Player.getComponentType());
+                        world.execute(() -> {
+                            Ref<EntityStore> ref = playerRef.getReference();
+                            Player player = ref.getStore().getComponent(ref, Player.getComponentType());
 
-                        ItemStack currentItem = player.getInventory().getHotbar().getItemStack(current);
-                        ItemStack beforeItem = player.getInventory().getHotbar().getItemStack(before);
+                            ItemStack currentItem = player.getInventory().getHotbar().getItemStack(current);
+                            ItemStack beforeItem = player.getInventory().getHotbar().getItemStack(before);
 
-                        if(currentItem != null && currentItem.getItemId().equalsIgnoreCase("Controller")){
-                            player.getHudManager().setCustomHud(playerRef, new IndicationEHUI(playerRef));
-                        } else {
-                            if(beforeItem != null && beforeItem.getItemId().equalsIgnoreCase("Controller")){
-                                player.getHudManager().setCustomHud(playerRef, new EmptyHUI(playerRef));
+                            if(currentItem != null && currentItem.getItemId().equalsIgnoreCase("Controller")){
+                                player.getHudManager().setCustomHud(playerRef, new IndicationEHUI(playerRef));
+                            } else {
+                                if(beforeItem != null && beforeItem.getItemId().equalsIgnoreCase("Controller")){
+                                    player.getHudManager().setCustomHud(playerRef, new EmptyHUI(playerRef));
+                                }
                             }
-                        }
 
-                    });
+                        });
+                    }
                 }
             }
         }

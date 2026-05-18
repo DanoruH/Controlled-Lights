@@ -48,8 +48,11 @@ public class SwitchWirelessInteraction extends SimpleInstantInteraction {
                 SwitchInteraction.switchLights(lights, world);
             } else if(config.containsGlobalSwitchValue(itemStack.getMetadata())) {
                 String id = config.getIdforSwitchLocal(itemStack.getMetadata());
-                Set<Vector3i> lights = config.getLightsForID(id);
-                SwitchInteraction.switchLights(lights, world);
+                if(id != null) {
+                    Set<Vector3i> lights = config.getLightsForID(id);
+                    SwitchInteraction.switchLights(lights, world);
+                }
+
             }
         }
     }

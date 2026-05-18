@@ -30,6 +30,7 @@ public class BreakEvent extends EntityEventSystem<EntityStore, BreakBlockEvent> 
     public void handle(int i, @NonNullDecl ArchetypeChunk<EntityStore> archetypeChunk, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer, @NonNullDecl BreakBlockEvent breakBlockEvent) {
         Ref<EntityStore> reference = archetypeChunk.getReferenceTo(i);
         Player player = store.getComponent(reference, Player.getComponentType());
+        PlayerRef playerRef = store.getComponent(reference, PlayerRef.getComponentType());
 
         BlockType blockType = breakBlockEvent.getBlockType();
         Vector3i targetBlock = breakBlockEvent.getTargetBlock();
@@ -42,7 +43,7 @@ public class BreakEvent extends EntityEventSystem<EntityStore, BreakBlockEvent> 
         if(blockType.getItem().getId().startsWith("Switch_")){
             if(networksComponent.containsSwitchBlock(targetBlock)){
                 networksComponent.removeNetwork(networksComponent.getIdForSwitch(targetBlock));
-                SoundUtil.playSoundEvent2d(SoundEvent.getAssetMap().getIndex(SOUND_DISCONNECT), SoundCategory.SFX, commandBuffer);
+                SoundUtil.playSoundEvent2dToPlayer(playerRef, SoundEvent.getAssetMap().getIndex(SOUND_DISCONNECT), SoundCategory.SFX);
             }
         }
     }
